@@ -1,0 +1,30 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "type": "npm",
+            "script": "start-compile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "label": "npm: start-compile",
+            "detail": "tsc --watch"
+        },
+        {
+            "type": "npm",
+            "script": "start",
+            "problemMatcher": [],
+            "label": "npm: start",
+            "detail": "run-p start-compile start-run"
+        },
+        {
+            "type": "npm",
+            "script": "start-run",
+            "problemMatcher": [],
+            "label": "npm: start-run",
+            "detail": "browser-sync start --server -w"
+        }
+    ]
+}
