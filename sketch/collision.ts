@@ -32,6 +32,9 @@ class Rect {
 
     public outline_color: any;
     public fill_color: any;
+    
+    protected saved_outline_color: any = null;
+    protected saved_fill_color: any    = null;
 
     /**
      * Determine if this rect is currently being pressed. True when
@@ -221,5 +224,26 @@ class Rect {
         this.outline_color = value;
         return this;
     }
+
+    /**
+     * Saves the specified color so that it can be re-loaded later
+     * @param option Determine which type of color to save. If `"fill"`, saves only the fill color. If `"outline"`, saves only the outline color. If `"both"`, saves both.1
+     */
+    public saveColor(option: 'fill' | 'outline' | 'both' = 'both'): this {
+        if (option == "fill" || option == "both") this.saved_fill_color = this.fill_color;
+        if (option == "outline" || option == "both") this.saved_outline_color = this.outline_color;
+        return this;
+    }
+
+    /**
+     * Re-loads the specified color that was saved
+     * @param option Determine which type of color to load. If `"fill"`, loads only the fill color. If `"outline"`, loads only the outline color. If `"both"`, loads both.1
+     */
+    public loadColor(option: 'fill' | 'outline' | 'both' = 'both'): this {
+        if (option == "fill" || option == "both") this.fill_color = this.saved_fill_color;
+        if (option == "outline" || option == "both") this.outline_color = this.saved_outline_color;
+        return this;
+    }
+    
 
 }

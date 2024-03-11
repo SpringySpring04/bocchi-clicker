@@ -5,6 +5,8 @@ const _bocchiFaces = {
     xi: p5.Image.prototype
 };
 
+var current_bocchi_face: p5.Image;
+
 var hitbox: Rect;
 
 function windowResized() {
@@ -18,27 +20,34 @@ function preload() {
 }
 
 function setup() {
+    current_bocchi_face = _bocchiFaces.normal;
     createCanvas(windowWidth, windowHeight);
-    hitbox = new Rect({x: 50, y: 50, w: 50, h: 50})
-    .fillColor('#00aa00')
+    hitbox = new Rect({x: 180, y: 220, w: 230, h: 210})
+    .fillColor(null)
     .outlineColor(null)
-    // below is for debugging
     .mouseHover((self)=>{
-        self.fill_color = '#00ff00';
+        if (self.isPressed) return;
+        current_bocchi_face = _bocchiFaces.xi;
     })
     .mouseHoverRelease((self)=>{
-        self.fill_color = '#00aa00';
+        if (self.isPressed) return;
+        current_bocchi_face = _bocchiFaces.normal;
     })
     .mouseDown((self)=>{
-        console.log("hitbox clicked!");
+        current_bocchi_face = _bocchiFaces.shock;
+        // console.log("hitbox clicked!");
     })
     .mouseUp((self)=>{
-        console.log("hitbox release!");
+        if (Rect.CollidePointRect({x:mouseX,y:mouseY}, self.toRectCon()))
+            current_bocchi_face = _bocchiFaces.xi;
+        else
+            current_bocchi_face = _bocchiFaces.normal;
+        // console.log("hitbox release!");
     })
 }
 
 function draw() {
-    background(0);
-    image(_bocchiFaces.normal, 20, 20);
+    background(37);
+    image(current_bocchi_face, 20, 20);
     hitbox.render();
 }

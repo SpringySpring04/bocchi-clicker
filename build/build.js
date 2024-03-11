@@ -1,6 +1,8 @@
 var Rect = (function () {
     function Rect(_a) {
         var x = _a.x, y = _a.y, w = _a.w, h = _a.h;
+        this.saved_outline_color = null;
+        this.saved_fill_color = null;
         this._mouseIsPressed = false;
         this._mouseWasPressed = false;
         this._mouseIsInside = false;
@@ -122,6 +124,22 @@ var Rect = (function () {
         this.outline_color = value;
         return this;
     };
+    Rect.prototype.saveColor = function (option) {
+        if (option === void 0) { option = 'both'; }
+        if (option == "fill" || option == "both")
+            this.saved_fill_color = this.fill_color;
+        if (option == "outline" || option == "both")
+            this.saved_outline_color = this.outline_color;
+        return this;
+    };
+    Rect.prototype.loadColor = function (option) {
+        if (option === void 0) { option = 'both'; }
+        if (option == "fill" || option == "both")
+            this.fill_color = this.saved_fill_color;
+        if (option == "outline" || option == "both")
+            this.outline_color = this.saved_outline_color;
+        return this;
+    };
     return Rect;
 }());
 var _bocchiFaces = {
@@ -129,6 +147,7 @@ var _bocchiFaces = {
     shock: p5.Image.prototype,
     xi: p5.Image.prototype
 };
+var current_bocchi_face;
 var hitbox;
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
@@ -139,26 +158,34 @@ function preload() {
     _bocchiFaces.xi = loadImage('assets/bocchi_x.png');
 }
 function setup() {
+    current_bocchi_face = _bocchiFaces.normal;
     createCanvas(windowWidth, windowHeight);
-    hitbox = new Rect({ x: 50, y: 50, w: 50, h: 50 })
-        .fillColor('#00aa00')
+    hitbox = new Rect({ x: 180, y: 220, w: 230, h: 210 })
+        .fillColor(null)
         .outlineColor(null)
         .mouseHover(function (self) {
-        self.fill_color = '#00ff00';
+        if (self.isPressed)
+            return;
+        current_bocchi_face = _bocchiFaces.xi;
     })
         .mouseHoverRelease(function (self) {
-        self.fill_color = '#00aa00';
+        if (self.isPressed)
+            return;
+        current_bocchi_face = _bocchiFaces.normal;
     })
         .mouseDown(function (self) {
-        console.log("hitbox clicked!");
+        current_bocchi_face = _bocchiFaces.shock;
     })
         .mouseUp(function (self) {
-        console.log("hitbox release!");
+        if (Rect.CollidePointRect({ x: mouseX, y: mouseY }, self.toRectCon()))
+            current_bocchi_face = _bocchiFaces.xi;
+        else
+            current_bocchi_face = _bocchiFaces.normal;
     });
 }
 function draw() {
-    background(0);
-    image(_bocchiFaces.normal, 20, 20);
+    background(37);
+    image(current_bocchi_face, 20, 20);
     hitbox.render();
 }
 //# sourceMappingURL=build.js.map
