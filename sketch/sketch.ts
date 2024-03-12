@@ -4,23 +4,23 @@ const _bocchiFaces = {
     shock: p5.Image.prototype,
     xi: p5.Image.prototype
 };
+var fnt: p5.Font;
 
 var current_bocchi_face: p5.Image;
-
 var hitbox: Rect;
+
+var game: Game;
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
-
 function preload() {
     _bocchiFaces.normal = loadImage('assets/bocchi.png');
     _bocchiFaces.shock  = loadImage('assets/bocchi_Dx.png');
     _bocchiFaces.xi     = loadImage('assets/bocchi_x.png');
+    
 }
-
 function setup() {
-    current_bocchi_face = _bocchiFaces.normal;
     createCanvas(windowWidth, windowHeight);
     hitbox = new Rect({x: 180, y: 220, w: 230, h: 210})
     .fillColor(null)
@@ -39,13 +39,15 @@ function setup() {
     })
     .mouseUp((self)=>{
         if (Rect.CollidePointRect({x:mouseX,y:mouseY}, self.toRectCon()))
-            current_bocchi_face = _bocchiFaces.xi;
+        current_bocchi_face = _bocchiFaces.xi;
         else
             current_bocchi_face = _bocchiFaces.normal;
-        // console.log("hitbox release!");
-    })
+            // console.log("hitbox release!");
+        }
+    )
+    current_bocchi_face = _bocchiFaces.normal;
+    game = new Game();
 }
-
 function draw() {
     background(37);
     image(current_bocchi_face, 20, 20);
