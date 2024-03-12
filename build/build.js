@@ -1,17 +1,16 @@
-var Rect = (function () {
-    function Rect(_a) {
-        var x = _a.x, y = _a.y, w = _a.w, h = _a.h;
+class Rect {
+    constructor({ x, y, w, h }) {
         this.saved_outline_color = null;
         this.saved_fill_color = null;
         this._mouseIsPressed = false;
         this._mouseWasPressed = false;
         this._mouseIsInside = false;
         this._mouseWasInside = false;
-        this._mouseHover = function () { };
-        this._mouseHoverRelease = function () { };
-        this._mousePressed = function () { };
-        this._mouseDown = function () { };
-        this._mouseUp = function () { };
+        this._mouseHover = () => { };
+        this._mouseHoverRelease = () => { };
+        this._mousePressed = () => { };
+        this._mouseDown = () => { };
+        this._mouseUp = () => { };
         this.x = x;
         this.y = y;
         this.w = w;
@@ -19,27 +18,23 @@ var Rect = (function () {
         this.outline_color = null;
         this.fill_color = 'green';
     }
-    Rect.CollidePointRect = function (pt, rect) {
+    static CollidePointRect(pt, rect) {
         return (pt.x >= rect.x &&
             pt.y >= rect.y &&
             pt.x <= rect.x + rect.w &&
             pt.y <= rect.y + rect.h);
-    };
-    Rect.CollideRects = function (r1, r2) {
+    }
+    static CollideRects(r1, r2) {
         return (r1.x + r1.w >= r2.x &&
             r1.x <= r2.x + r2.w &&
             r1.y + r1.h >= r2.y &&
             r1.y <= r2.y + r2.h);
-    };
-    Object.defineProperty(Rect.prototype, "isPressed", {
-        get: function () { return this._mouseIsPressed; },
-        enumerable: true,
-        configurable: true
-    });
-    Rect.prototype.toRectCon = function () {
+    }
+    get isPressed() { return this._mouseIsPressed; }
+    toRectCon() {
         return { x: this.x, y: this.y, w: this.w, h: this.h };
-    };
-    Rect.prototype.render = function () {
+    }
+    render() {
         this.update();
         if (!this.outline_color)
             noStroke();
@@ -53,8 +48,8 @@ var Rect = (function () {
             fill(this.fill_color);
         }
         rect(this.x, this.y, this.w, this.h);
-    };
-    Rect.prototype.update = function () {
+    }
+    update() {
         this._mouseIsInside = Rect.CollidePointRect({ x: mouseX, y: mouseY }, this.toRectCon());
         this._mouseIsPressed = (this._mouseWasPressed || (this._mouseIsInside && !this._mouseWasPressed)) && mouseIsPressed;
         if (this._mouseIsInside && !this._mouseWasInside)
@@ -71,84 +66,222 @@ var Rect = (function () {
             this._mouseUp(this);
         }
         this._lateUpdate();
-    };
-    Rect.prototype._lateUpdate = function () {
+    }
+    _lateUpdate() {
         this._mouseWasInside = this._mouseIsInside;
         this._mouseWasPressed = this._mouseIsPressed;
-    };
-    Rect.prototype.mouseHover = function (callback) {
-        if (callback === void 0) { callback = function () { }; }
+    }
+    mouseHover(callback = () => { }) {
         if (typeof callback != 'function')
-            this._mouseHover = function () { };
+            this._mouseHover = () => { };
         else
             this._mouseHover = callback;
         return this;
-    };
-    Rect.prototype.mouseHoverRelease = function (callback) {
-        if (callback === void 0) { callback = function () { }; }
+    }
+    mouseHoverRelease(callback = () => { }) {
         if (typeof callback != 'function')
-            this._mouseHoverRelease = function () { };
+            this._mouseHoverRelease = () => { };
         else
             this._mouseHoverRelease = callback;
         return this;
-    };
-    Rect.prototype.mousePressed = function (callback) {
-        if (callback === void 0) { callback = function () { }; }
+    }
+    mousePressed(callback = () => { }) {
         if (typeof callback != 'function')
-            this._mousePressed = function () { };
+            this._mousePressed = () => { };
         else
             this._mousePressed = callback;
         return this;
-    };
-    Rect.prototype.mouseDown = function (callback) {
-        if (callback === void 0) { callback = function () { }; }
+    }
+    mouseDown(callback = () => { }) {
         if (typeof callback != 'function')
-            this._mouseDown = function () { };
+            this._mouseDown = () => { };
         else
             this._mouseDown = callback;
         return this;
-    };
-    Rect.prototype.mouseUp = function (callback) {
-        if (callback === void 0) { callback = function () { }; }
+    }
+    mouseUp(callback = () => { }) {
         if (typeof callback != 'function')
-            this._mouseUp = function () { };
+            this._mouseUp = () => { };
         else
             this._mouseUp = callback;
         return this;
-    };
-    Rect.prototype.fillColor = function (value) {
+    }
+    fillColor(value) {
         this.fill_color = value;
         return this;
-    };
-    Rect.prototype.outlineColor = function (value) {
+    }
+    outlineColor(value) {
         this.outline_color = value;
         return this;
-    };
-    Rect.prototype.saveColor = function (option) {
-        if (option === void 0) { option = 'both'; }
+    }
+    saveColor(option = 'both') {
         if (option == "fill" || option == "both")
             this.saved_fill_color = this.fill_color;
         if (option == "outline" || option == "both")
             this.saved_outline_color = this.outline_color;
         return this;
-    };
-    Rect.prototype.loadColor = function (option) {
-        if (option === void 0) { option = 'both'; }
+    }
+    loadColor(option = 'both') {
         if (option == "fill" || option == "both")
             this.fill_color = this.saved_fill_color;
         if (option == "outline" || option == "both")
             this.outline_color = this.saved_outline_color;
         return this;
-    };
-    return Rect;
-}());
-var _bocchiFaces = {
+    }
+}
+class Game {
+    constructor(difficulty = 60) {
+        this.lossAmount = 1;
+        let buffer = [0x00];
+        this._highScore = 1;
+        this._score = 1;
+        this.timer = new IntervalTimer(difficulty, this.update, { game: this });
+        this.lossAmount = 1;
+        this.display = (self) => {
+            return "Click on bocchi to start the game";
+        };
+    }
+    get highScore() { return this._highScore; }
+    setDifficultyTick(t) {
+        let tick = this.timer.tick;
+        this.timer.maxTime = t;
+        this.timer.tick = tick;
+    }
+    start() {
+        this.timer.start();
+        this.display = (self) => {
+            return `Score: ${self.score}\nHigh score: ${self._highScore}\nTimer: ${self.timer.tick}`;
+        };
+    }
+    get score() {
+        let n = this._score;
+        return n;
+    }
+    set score(value) {
+        this._score = value;
+        if (value > this._highScore)
+            this._highScore = this._score;
+    }
+    render() {
+        push();
+        noStroke();
+        fill('white');
+        textSize(16);
+        text(this.display(this), 30, 40);
+        pop();
+        this.timer.update();
+    }
+    update(timer, vars) {
+        vars.game.score -= vars.game.lossAmount;
+        if (vars.game.score < 0) {
+            gameOver = true;
+            vars.game.timer.stop();
+            console.log(`Game over!\nFinal high score: ${vars.game._highScore}`);
+            vars.game.display = (self) => {
+                return `Game over!\nFinal high score: ${self._highScore}`;
+            };
+        }
+    }
+}
+var TimerPlaybackStates;
+(function (TimerPlaybackStates) {
+    TimerPlaybackStates[TimerPlaybackStates["PLAY"] = 0] = "PLAY";
+    TimerPlaybackStates[TimerPlaybackStates["PAUSE"] = 1] = "PAUSE";
+    TimerPlaybackStates[TimerPlaybackStates["STOPPED"] = 2] = "STOPPED";
+})(TimerPlaybackStates || (TimerPlaybackStates = {}));
+class IntervalTimer {
+    constructor(maxTime, cb, vars = {}) {
+        this._callback = () => { };
+        this.vars = {};
+        this._maxTime = 0;
+        this._tick = 0;
+        this._playbackState = TimerPlaybackStates.STOPPED;
+        this._callback = cb;
+        this.vars = vars;
+        this._maxTime = maxTime;
+        this._tick = this._maxTime;
+    }
+    get maxTime() { return this._maxTime; }
+    set maxTime(value) {
+        this._maxTime = value;
+        this._tick = this._maxTime;
+    }
+    get tick() { return this._tick; }
+    set tick(value) { this._tick = Math.max(Math.min(value, this._maxTime), 0); }
+    get ticksElapsed() { return this._maxTime - this._tick; }
+    get playbackState() {
+        return this._playbackState;
+    }
+    callback(cb, objs = undefined) {
+        this._callback = cb;
+        if (objs)
+            this.vars = objs;
+    }
+    start(cb_fromStop = () => { }, cb_fromPause = () => { }) {
+        if (this._playbackState == TimerPlaybackStates.PLAY)
+            return;
+        if (this._playbackState == TimerPlaybackStates.STOPPED) {
+            if (cb_fromStop)
+                cb_fromStop(this);
+            this._tick = this._maxTime;
+        }
+        else {
+            if (cb_fromPause)
+                cb_fromPause(this);
+        }
+        this._playbackState = TimerPlaybackStates.PLAY;
+    }
+    pause(cb = () => { }) {
+        if (this._playbackState == TimerPlaybackStates.STOPPED || this._playbackState == TimerPlaybackStates.PAUSE)
+            return;
+        if (cb)
+            cb(this);
+        this._playbackState = TimerPlaybackStates.PAUSE;
+    }
+    stop(cb = () => { }) {
+        if (this._playbackState == TimerPlaybackStates.STOPPED)
+            return;
+        if (cb)
+            cb(this);
+        this._tick = this._maxTime;
+        this._playbackState = TimerPlaybackStates.STOPPED;
+    }
+    update() {
+        switch (this._playbackState) {
+            case TimerPlaybackStates.STOPPED:
+                this._tick = this._maxTime;
+                return;
+            case TimerPlaybackStates.PAUSE:
+                return;
+            default:
+                break;
+        }
+        if (this._tick > 0)
+            this._tick--;
+        else {
+            this._callback(this, this.vars);
+            this._tick = this._maxTime;
+        }
+    }
+}
+const _bocchiFaces = {
     normal: p5.Image.prototype,
     shock: p5.Image.prototype,
     xi: p5.Image.prototype
 };
+var fnt;
 var current_bocchi_face;
 var hitbox;
+var game;
+var gameOver = false;
+const difficultyDictionary = {
+    "0": [60, 1],
+    "50": [50, 2],
+    "100": [40, 4],
+    "150": [30, 8],
+    "200": [20, 12],
+    "250": [10, 14]
+};
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
@@ -158,34 +291,51 @@ function preload() {
     _bocchiFaces.xi = loadImage('assets/bocchi_x.png');
 }
 function setup() {
-    current_bocchi_face = _bocchiFaces.normal;
     createCanvas(windowWidth, windowHeight);
     hitbox = new Rect({ x: 180, y: 220, w: 230, h: 210 })
         .fillColor(null)
         .outlineColor(null)
-        .mouseHover(function (self) {
+        .mouseHover((self) => {
         if (self.isPressed)
             return;
         current_bocchi_face = _bocchiFaces.xi;
     })
-        .mouseHoverRelease(function (self) {
+        .mouseHoverRelease((self) => {
         if (self.isPressed)
             return;
         current_bocchi_face = _bocchiFaces.normal;
     })
-        .mouseDown(function (self) {
+        .mouseDown((self) => {
         current_bocchi_face = _bocchiFaces.shock;
+        if (game.timer.playbackState == TimerPlaybackStates.STOPPED && !gameOver)
+            game.start();
+        else if (game.timer.playbackState == TimerPlaybackStates.PLAY) {
+            game.timer.tick = game.timer.maxTime;
+            game.score++;
+        }
     })
-        .mouseUp(function (self) {
+        .mouseUp((self) => {
         if (Rect.CollidePointRect({ x: mouseX, y: mouseY }, self.toRectCon()))
             current_bocchi_face = _bocchiFaces.xi;
         else
             current_bocchi_face = _bocchiFaces.normal;
     });
+    current_bocchi_face = _bocchiFaces.normal;
+    game = new Game();
 }
 function draw() {
     background(37);
     image(current_bocchi_face, 20, 20);
     hitbox.render();
+    game.render();
+    calculateDifficulty();
+}
+function calculateDifficulty() {
+    for (let [k, v] of Object.entries(difficultyDictionary)) {
+        if (game.highScore >= parseInt(k)) {
+            game.setDifficultyTick(v[0]);
+            game.lossAmount = v[1] || 1;
+        }
+    }
 }
 //# sourceMappingURL=build.js.map
